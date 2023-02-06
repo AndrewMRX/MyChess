@@ -1,0 +1,6 @@
+F:\MyPrograms\CSharp\Chess\Chess\bin\Debug\Chess.dll
+F:\MyPrograms\CSharp\Chess\Chess\bin\Debug\Chess.pdb
+F:\MyPrograms\CSharp\Chess\Chess\obj\Debug\Chess.csproj.AssemblyReference.cache
+F:\MyPrograms\CSharp\Chess\Chess\obj\Debug\Chess.csproj.CoreCompileInputs.cache
+F:\MyPrograms\CSharp\Chess\Chess\obj\Debug\Chess.dll
+F:\MyPrograms\CSharp\Chess\Chess\obj\Debug\Chess.pdb

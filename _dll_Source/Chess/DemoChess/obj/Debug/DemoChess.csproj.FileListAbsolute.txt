@@ -1,0 +1,11 @@
+F:\MyPrograms\CSharp\Chess\DemoChess\bin\Debug\DemoChess.exe.config
+F:\MyPrograms\CSharp\Chess\DemoChess\bin\Debug\DemoChess.exe
+F:\MyPrograms\CSharp\Chess\DemoChess\bin\Debug\DemoChess.pdb
+F:\MyPrograms\CSharp\Chess\DemoChess\bin\Debug\Chess.dll
+F:\MyPrograms\CSharp\Chess\DemoChess\bin\Debug\Chess.pdb
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.csproj.AssemblyReference.cache
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.csproj.SuggestedBindingRedirects.cache
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.csproj.CoreCompileInputs.cache
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.csproj.CopyComplete
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.exe
+F:\MyPrograms\CSharp\Chess\DemoChess\obj\Debug\DemoChess.pdb
