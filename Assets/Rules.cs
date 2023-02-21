@@ -2,52 +2,227 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Chess;
+using ChessCore;
+using UnityEngine.UIElements;
+using UnityEngine.UI;
+using TMPro;
+using JetBrains.Annotations;
+using Unity.VisualScripting;
 
-namespace Chess
+namespace ChessCore
 {
     public class Rules : MonoBehaviour
     {
         DragAndDrop dad;
-        Chess chess;
+        Board board;
+        Command cmd1;
+        Command cmd2;
+        Command activeCmd;
+        Command enemyCmd;
+        Text message;
+        public TextMeshProUGUI checkMateMessage;
 
         public Rules()
         {
             dad = new DragAndDrop();
-            chess = new Chess();           
+
+            bool ingame = true;
+            board = new Board(8, 8);
+            cmd1 = new Command("white", "");
+            cmd2 = new Command("black", "");
+            activeCmd = cmd1;
+            enemyCmd = cmd2;
+            
+
+            board.StartSetFigures();
+            board.FormBoard();
+
         }
         // Start is called before the first frame update
         public void Start()
         {
+            //checkMateMessage = gameObject.AddComponent<TextMeshProUGUI>();
             ShowFigures();
             //MarkValidFigures();
+            //checkMateMessage.text = "Empty";
         }
 
         // Update is called once per frame
         void Update()
         {
+
+            if (dad.picked == 1)
+            {
+                ShowValidMoves();
+            }
+            else if (dad.picked == 0)
+            {
+                UnmarkAllSquares();
+                dad.picked = -1;
+            }
+
+
             if (dad.Action())
             {
                 string from = GetSquare(dad.pickPosition);
                 //Debug.Log(dad.pickPosition);
                 string to = GetSquare(dad.dropPosition);
                 //Debug.Log(to + " thisTo");
-                string figure = chess.GetFigureAt(from).ToString();
-                string move = figure + from + to;
+                //string figure = chess.GetFigureAt(from).ToString();
+                //string move = figure + from + to;
                 //Debug.Log(move);
-                chess = chess.Move(move);
+
+                //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                //&&&&&&&&&&&&&&&&PROCESS&&&&&&&&&&&&&&&&&&&&&&&&
+                //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                //if (board.isMate == true || board.isPat == true)
+                //{
+                //    ingame = false;
+                //    break;
+                //}
+
+                
+
+                //if(board.isCheck == true) break;
+
+                //board.DrawBoard();
+
+
+                
+
+                board.GetPossibleMoves(activeCmd);
+
+
+                ValidateMoves();
+                
+
+                board.ShowValidMoves();
+                Console.WriteLine(board.validMoves.Count);
+
+
+                activeCmd.value = from + to;
+                activeCmd.value = Command.ToSystemCoords(activeCmd.value);
+                activeCmd = Command.FillIntCmd(activeCmd);
+
+                
+
+
+                if (board.Move(activeCmd) == true)
+                {
+                    if (activeCmd == cmd2)
+                    {
+                        activeCmd = cmd1;
+                        enemyCmd = cmd2;
+                    }
+                    else
+                    {
+                        activeCmd = cmd2;
+                        enemyCmd = cmd1;
+                    }
+                }
+                board.moveColor = activeCmd.player;
+                Console.WriteLine(activeCmd.value);
+                Console.WriteLine(activeCmd.intvalues[0] + " " + activeCmd.intvalues[1] + " " + activeCmd.intvalues[2] + " " + activeCmd.intvalues[3]);
+                board.FormBoard();
+                //board.DrawBoard();
+                //Console.WriteLine(activeCmd.player);
+                //board.testField = board.field.Clone() as char[,];
+                //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                //&&&&&&&&&&&&&&&&&&&&END&&&&&&&&&&&&&&&&&&&&&&&&&&
+                //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+                board.GetPossibleMoves(enemyCmd);
+                board.isCheck = board.IsCheck();
+
+
+                //^^^^^^^CHECK MESSAGE^^^^^^
+
+
+                if (board.isCheck == true)
+                {
+                    //MarkSquare(0, 0, true);
+                    checkMateMessage.text = "CHECK!";
+                }
+
+                else checkMateMessage.text = "";
+
+                board.GetPossibleMoves(activeCmd);
+                ValidateMoves();
+
+                if (board.validMoves.Count == 0)
+                {
+                    if (board.isCheck == true)
+                    {
+                        board.isMate = true;
+                        checkMateMessage.text = "CheckMate";
+                    }
+
+                    else
+                    {
+                        board.isPat = true;
+                        checkMateMessage.text = "PAT";
+                    }
+
+                }
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+                //chess = chess.Move(move);
+
                 ShowFigures();
                 //MarkValidFigures();
+
+            }
+        }
+
+        public void ValidateMoves()
+        {
+            board.validMoves.Clear();
+            //Console.WriteLine("Count" + board.possibleMoves.Count);
+            for (int i = 0; i < board.possibleMoves.Count; i++)
+            {
+                //Console.WriteLine(Board.possibleMoves[i]);
+                Board testBoard = new Board(board);
+                //testBoard.StartSetFigures();
+                testBoard.FormBoard();
+                Command testCmd = new Command(activeCmd.player, board.possibleMoves[i]);
+                testCmd.value = Command.ToSystemCoords(testCmd.value);
+                testCmd = Command.FillIntCmd(testCmd);
+
+
+                //Console.WriteLine(testBoard.possibleMoves[i]);
+
+                //Console.WriteLine("now test cmd " + testCmd.value + " " + testCmd.intvalues[0] + testCmd.intvalues[1] + testCmd.intvalues[2] + testCmd.intvalues[3]);
+                //Thread.Sleep(1000);
+
+                testBoard.Move(testCmd);
+                testBoard.FormBoard();
+                if (testCmd.player == "white")
+                    testCmd.player = "black";
+                else testCmd.player = "white";
+                testBoard.GetPossibleMoves(testCmd);
+
+
+                testBoard.moveColor = testCmd.player;
+                if (testBoard.IsCheck2() == false)
+                {
+                    board.validMoves.Add(board.possibleMoves[i]);
+                }
+
+                //testBoard.DrawBoard();
+                //testBoard.ShowPossibleMoves();
+                //Thread.Sleep(1000);
+
             }
         }
 
         public void ButtonTest()
         {
-            PlaceFigure("box55","q",5,5);
+            PlaceFigure("box55", "q", 5, 5);
             Debug.Log("button clicked");
         }
 
-        string GetSquare (Vector2 position)
+        string GetSquare(Vector2 position)
         {
             int x = Convert.ToInt32(position.x / 2.0);
             //Debug.Log(x);
@@ -59,11 +234,17 @@ namespace Chess
         void ShowFigures()
         {
             int nr = 0;
-            for (int y = 0; y < 8; y++ )
+            for (int y = 0; y < 8; y++)
                 for (int x = 0; x < 8; x++)
                 {
-                    string figure = chess.GetFigureAt(x, y).ToString();
-                    if (figure == ".") continue;
+                    int indexInFigArray = board.GetFigureAt(x, y);
+                    string figure;
+                    if (indexInFigArray != -1)
+                    {
+                        figure = board.figures[indexInFigArray].name.ToString();
+                        //Debug.Log(x + " " + y);
+                    }
+                    else continue;
                     PlaceFigure("box" + nr, figure, x, y);
                     nr++;
                 }
@@ -71,33 +252,6 @@ namespace Chess
                 PlaceFigure("box" + nr, "q", 9, 9);
             //MarkSquare(0,0,true);
         }
-
-        void MarkValidFigures()
-        {
-            for (int y = 0; y < 8; y++)
-                for (int x = 0; x < 8; x++)
-                    MarkSquare(x, y, true);
-            foreach (string moves in chess.GetAllMoves() )
-            {
-                int x,y;
-                GetCoord(moves.Substring(1,2),out x, out y);
-                MarkSquare(x, y, true);
-            }
-        }
-        
-        void GetCoord(string name, out int x, out int y) // e2, h8, g5...
-        {
-            x = 9;
-            y = 9;
-            if (name.Length == 2 &&
-                name[0] >= 'a' && name[0] <= 'h' &&
-                name[1] >= '1' && name[1] <= '8')
-            {
-                x = name[0] - 'a';
-                y = name[1] - '1';
-            }
-        }
-
         void PlaceFigure(string box, string figure, int x, int y)
         {
             //Debug.Log(box + " " + figure + " " + x + " " + y);
@@ -110,6 +264,32 @@ namespace Chess
             spriteBox.sprite = spriteFigure.sprite;
 
             goBox.transform.position = goSquare.transform.position;
+        }
+
+        void MarkValidFigures()
+        {
+            //for (int y = 0; y < 8; y++)
+            //    for (int x = 0; x < 8; x++)
+            //        MarkSquare(x, y, true);
+            //foreach (string moves in chess.GetAllMoves() )
+            //{
+            //    int x,y;
+            //    GetCoord(moves.Substring(1,2),out x, out y);
+            //    MarkSquare(x, y, true);
+            //}
+        }
+
+        void GetCoord(string name, out int x, out int y) // e2, h8, g5...
+        {
+            x = 9;
+            y = 9;
+            if (name.Length == 2 &&
+                name[0] >= 'a' && name[0] <= 'h' &&
+                name[1] >= '1' && name[1] <= '8')
+            {
+                x = name[0] - 'a';
+                y = name[1] - '1';
+            }
         }
 
         private void MarkSquare(int x, int y, bool isMarked)
@@ -125,26 +305,63 @@ namespace Chess
             var spriteCell = goCell.GetComponent<SpriteRenderer>();
             spriteSquare.sprite = spriteCell.sprite;
         }
+        public void ShowValidMoves()
+        {
+            board.GetPossibleMoves(activeCmd);
+            ValidateMoves();
+            Debug.Log(((dad.pickPosition.x) / 1) + " " + ((dad.pickPosition.y) / 1));
+            foreach (var el in board.validMoves)
+            {
+                int x1 = Convert.ToInt32(el[0] - 'a');
+                int y1 = 7 - Convert.ToInt32(el[1] - '1');
+                int pickedX = Convert.ToInt32(dad.pickPosition.x) / 2;
+                int pickedY = 7 - (Convert.ToInt32(dad.pickPosition.y) / 2);
+                //Debug.Log(pickedX + " " + pickedY + " " + x1 + " " + y1);
+                if (pickedX == x1 && pickedY == y1)
+                {
+                    //Debug.Log(el);
+                    int x = Convert.ToInt32(el[2] - 'a');
+                    int y = 7 - Convert.ToInt32(el[3] - '1');
+                    //Debug.Log(x + " " + y);
+                    MarkSquare(y, x, true);
+                }
+
+            }
+        }
+        public void UnmarkAllSquares()
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                for(int x = 0; x < 8; x++)
+                {
+                    MarkSquare(y, x, false);
+                }
+            }
+            
+        }
     }
 
     class DragAndDrop
     {
-        enum State
+        public enum State
         {
             none,
             drag
         }
 
+        public int picked;
+
         public Vector2 pickPosition { get; private set; }
         public Vector2 dropPosition { get; private set; }
 
-        State state;
+        public State state;
         GameObject item;
         Vector2 offset;
         public DragAndDrop()
         {
             state = State.none;
             item = null;
+            picked = 0;
         }
 
         public bool Action()
@@ -182,6 +399,7 @@ namespace Chess
             pickPosition = clickedItem.position;
             item = clickedItem.gameObject;
             state = State.drag;
+            picked = 1;
             offset = pickPosition - clickPosition;
             //Debug.Log("picked up: " + item.name);
         }
@@ -201,15 +419,18 @@ namespace Chess
 
         void Drag()
         {
-            item.transform.position = GetClickPosition() + offset;
+            item.transform.position = GetClickPosition() + offset;           
         }
 
         void Drop()
         {
             dropPosition = item.transform.position;
             state = State.none;
+            picked = 0;
             item = null;
         }
+
+       
     }
 
 

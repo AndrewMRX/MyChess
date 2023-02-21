@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Chess.unity
+    path: Assets/Scenes/Menu.unity
+    guid: bb19b6ce2b6e15849bb1917d1849f91b
+  - enabled: 1
+    path: Assets/Scenes/Chess.unity
     guid: 28e41052ce5cad940870c0223a7cd617
   m_configObjects: {}
