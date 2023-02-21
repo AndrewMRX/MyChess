@@ -135,7 +135,7 @@ namespace ChessCore
                 board.isCheck = board.IsCheck();
 
 
-                //^^^^^^^CHECK MESSAGE^^^^^^
+                //^^^^^^^CHECK MESSAGE^^^^^^&&
 
 
                 if (board.isCheck == true)
