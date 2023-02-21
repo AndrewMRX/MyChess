@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "ChessDemo/1.0.0": {
+        "dependencies": {
+          "ChessCore": "1.0.0"
+        },
+        "runtime": {
+          "ChessDemo.dll": {}
+        }
+      },
+      "ChessCore/1.0.0": {
+        "runtime": {
+          "ChessCore.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ChessDemo/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ChessCore/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
