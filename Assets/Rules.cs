@@ -15,12 +15,14 @@ namespace ChessCore
     {
         DragAndDrop dad;
         Board board;
+        string style = "wood";
         Command cmd1;
         Command cmd2;
         Command activeCmd;
         Command enemyCmd;
         Text message;
         public TextMeshProUGUI checkMateMessage;
+        //public TextMeshPro 
 
         public Rules()
         {
@@ -41,6 +43,17 @@ namespace ChessCore
         // Start is called before the first frame update
         public void Start()
         {
+            var messages = FindObjectsOfType<TextMeshProUGUI>();
+            foreach(var m in messages)
+            {
+                if (m.text == "checkMess")
+                {
+                    checkMateMessage = m;
+                }                   
+            }
+            checkMateMessage.text = "";
+            
+            //this.board.figures[0].name = 'r';           
             //checkMateMessage = gameObject.AddComponent<TextMeshProUGUI>();
             ShowFigures();
             //MarkValidFigures();
@@ -50,24 +63,29 @@ namespace ChessCore
         // Update is called once per frame
         void Update()
         {
-
+            
             if (dad.picked == 1)
             {
                 ShowValidMoves();
             }
             else if (dad.picked == 0)
             {
-                UnmarkAllSquares();
+                UnmarkAllSquares();               
                 dad.picked = -1;
             }
+            GeneralProcees();
+        }
 
-
+        private void GeneralProcees()
+        {
+ 
             if (dad.Action())
             {
+                Debug.Log("dad.Action = true");
                 string from = GetSquare(dad.pickPosition);
-                //Debug.Log(dad.pickPosition);
+                Debug.Log(from + " thisfrom");
                 string to = GetSquare(dad.dropPosition);
-                //Debug.Log(to + " thisTo");
+                Debug.Log(to + " thisTo");
                 //string figure = chess.GetFigureAt(from).ToString();
                 //string move = figure + from + to;
                 //Debug.Log(move);
@@ -81,20 +99,20 @@ namespace ChessCore
                 //    break;
                 //}
 
-                
+
 
                 //if(board.isCheck == true) break;
 
                 //board.DrawBoard();
 
 
-                
+
 
                 board.GetPossibleMoves(activeCmd);
 
 
                 ValidateMoves();
-                
+
 
                 board.ShowValidMoves();
                 Console.WriteLine(board.validMoves.Count);
@@ -104,7 +122,7 @@ namespace ChessCore
                 activeCmd.value = Command.ToSystemCoords(activeCmd.value);
                 activeCmd = Command.FillIntCmd(activeCmd);
 
-                
+
 
 
                 if (board.Move(activeCmd) == true)
@@ -144,7 +162,18 @@ namespace ChessCore
                     checkMateMessage.text = "CHECK!";
                 }
 
-                else checkMateMessage.text = "";
+                else
+                {
+                    try
+                    {
+                        checkMateMessage.text = "nullbull";
+                    }
+                    catch (NullReferenceException ex)
+                    {
+                        Debug.Log("myLight was not set in the inspector");
+                    }
+
+                }
 
                 board.GetPossibleMoves(activeCmd);
                 ValidateMoves();
@@ -154,13 +183,13 @@ namespace ChessCore
                     if (board.isCheck == true)
                     {
                         board.isMate = true;
-                        checkMateMessage.text = "CheckMate";
+                        //checkMateMessage.text = "CheckMate";
                     }
 
                     else
                     {
                         board.isPat = true;
-                        checkMateMessage.text = "PAT";
+                        //checkMateMessage.text = "PAT";
                     }
 
                 }
@@ -214,6 +243,7 @@ namespace ChessCore
                 //Thread.Sleep(1000);
 
             }
+
         }
 
         public void ButtonTest()
@@ -300,7 +330,7 @@ namespace ChessCore
             if (isMarked)
                 goCell = GameObject.Find(color + "SquareMarked");
             else
-                goCell = GameObject.Find(color + "Square");
+                goCell = GameObject.Find("ActiveStyle" + color + "Square");
             var spriteSquare = goSquare.GetComponent<SpriteRenderer>();
             var spriteCell = goCell.GetComponent<SpriteRenderer>();
             spriteSquare.sprite = spriteCell.sprite;
