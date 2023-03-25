@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Threading.Tasks;
 using TMPro;
+using JetBrains.Annotations;
 
 public class LogReg : MonoBehaviour
 {
@@ -43,6 +44,7 @@ public class LogReg : MonoBehaviour
     {
         if(inputUser.text == "" || inputPassword.text == "")
         {
+            errorMessage.color = Color.red;
             errorMessage.text = "Fields cannot be empty.";
             return false;
         }
@@ -84,7 +86,7 @@ public class LogReg : MonoBehaviour
 
         Debug.Log("Server Answer is: " + answer);
         Debug.Log("Uri is: " + uri);
-        //www.Dispose();
+        www.Dispose();
     }
 
     public void LoginPost()
@@ -96,6 +98,7 @@ public class LogReg : MonoBehaviour
     {
         string uri = "https://localhost:7098/api/User/Login?username=" + inputUser.text + "&password=" + inputPassword.text;
         string answer;
+        string NickName = inputUser.text;
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
         //formData.Add(new MultipartFormDataSection("username=foo&password=bar"));
         UnityWebRequest www = UnityWebRequest.Post(uri, formData);
@@ -118,11 +121,14 @@ public class LogReg : MonoBehaviour
         {
             errorMessage.color = Color.green;
             errorMessage.text = "Logged";
+            Scenes.LoadScene(1);
+            PlayerData.NickName = NickName;
+            
         }
 
         Debug.Log("Server Answer is: " + answer);
         Debug.Log("Uri is: " + uri);
-        //www.Dispose();
+        www.Dispose();
     }
 
     IEnumerator Upload()

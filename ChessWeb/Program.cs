@@ -22,6 +22,13 @@ var app = builder.Build();
 
 Console.WriteLine("Runned");
 
+//Container cnt1 = new Container();
+//cnt1.MainContainer.Append(new NameMovePair("Adam", "a1a1"));
+//cnt1.MainContainer.Append(new NameMovePair("Adam1", "a1a1"));
+
+//Container.AddToContainer(new NameMovePair("Adam", "h7h5"));
+//Container.AddToContainer(new NameMovePair("Adam2", "h7h5"));
+
 //var contextOptions = new DbContextOptionsBuilder<ChessContext>()
 //    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 //    .Options;
@@ -59,12 +66,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+
 app.MapControllers();
 
+
 app.Run();
+
 
 

@@ -8,27 +8,53 @@ using UnityEngine.UI;
 using TMPro;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
+using UnityEngine.Networking;
+using System.Threading;
+using UnityEngine.Rendering;
+using System.Text;
+using System.Threading.Tasks;
+//using UnityEditor.SceneManagement;
 
 namespace ChessCore
 {
+    [System.Serializable]
+    public class Message
+    {
+        public string text;
+        [SerializeField] public TMP_Text textObject;
+    }
+
     public class Rules : MonoBehaviour
     {
+        string playerPlayingAs = ServerAnswers.MyColor;
+
         DragAndDrop dad;
         Board board;
+        static bool ingame = true;
         string style = "wood";
         Command cmd1;
         Command cmd2;
         Command activeCmd;
         Command enemyCmd;
         Text message;
-        public TextMeshProUGUI checkMateMessage;
-        //public TextMeshPro 
+        public int maxMessages = 25;
+        public GameObject chatPanel, textObject;
+        [SerializeField] public TextMeshProUGUI checkMateMessage;
+        [SerializeField] public GameObject content;
+        [SerializeField] List<Message> messageList = new List<Message>();
+        //[SerializeField] public ScrollView scrollView;
+        //[SerializeField] private Scrollbar scrollBar;
+        //[SerializeField] private GUIContent scrollViewContent;
+        //public TextMeshPro
+
+        bool proceesFinished = false;
+        int proceesFinishedInt = 0;
 
         public Rules()
         {
             dad = new DragAndDrop();
 
-            bool ingame = true;
+            ingame = true;
             board = new Board(8, 8);
             cmd1 = new Command("white", "");
             cmd2 = new Command("black", "");
@@ -46,13 +72,25 @@ namespace ChessCore
             var messages = FindObjectsOfType<TextMeshProUGUI>();
             foreach(var m in messages)
             {
+                
                 if (m.text == "checkMess")
                 {
                     checkMateMessage = m;
-                }                   
+                }
+                //if (m.text == "Suzuki")
+                //{
+                //    Destroy(m);
+                //    //var item_go = m.transform.parent;
+                //    var newText = gameObject.AddComponent<TextMeshProUGUI>();
+                //    newText.text = "mitsu";
+                //    Instantiate(newText, item_go.transform);
+                //    Debug.Log("NEWTEXT TEXT: " + newText.text);
+                //    Debug.Log("ITEMGO NAME: " + item_go.name);
+                //}
+
             }
             checkMateMessage.text = "";
-            
+
             //this.board.figures[0].name = 'r';           
             //checkMateMessage = gameObject.AddComponent<TextMeshProUGUI>();
             ShowFigures();
@@ -60,32 +98,134 @@ namespace ChessCore
             //checkMateMessage.text = "Empty";
         }
 
+        public void SendMessageToChat(string text)
+        {
+            Message newMessage = new Message();
+            newMessage.text = text;
+            GameObject newText = Instantiate(textObject, chatPanel.transform);
+            newMessage.textObject = newText.GetComponent<TMP_Text>();
+            newMessage.textObject.text = newMessage.text;
+            messageList.Add(newMessage);
+        }
+
+        public void DelayRequest()
+        {          
+            Debug.Log("I REQUEST SERVER");
+            //SendMove_Get(PlayerData.NickName,"111");
+            RequestMove_Get(ServerAnswers.EnemyName);
+            proceesFinished = false;
+            //ServerAnswers.prevMove = ServerAnswers.serverAnswerMove;              
+        }
+
         // Update is called once per frame
         void Update()
         {
-            
+            //Task.Delay(4000);    
+            if (Rules.ingame)
+            {
+                checkMateMessage.text = "S111";
+                if (board.moveColor == "white" && playerPlayingAs == "white")
+                {
+                    ShowMoveAndMove();
+                    checkMateMessage.text = playerPlayingAs;
+                    
+                }
+                else if(board.moveColor == "black" && playerPlayingAs == "white")
+                {
+                    GeneralProcees(true);
+                    checkMateMessage.text = playerPlayingAs;
+                    
+                    proceesFinishedInt++;
+                    if (proceesFinishedInt > 100)
+                    {
+                        proceesFinishedInt = 0;
+                        StartCoroutine("DelayRequest");
+                    }
+                }
+                else if (board.moveColor == "white" && playerPlayingAs == "black")
+                {
+                    GeneralProcees(true);
+                    checkMateMessage.text = playerPlayingAs;
+
+                    proceesFinishedInt++;
+                    if (proceesFinishedInt > 100)
+                    {
+                        proceesFinishedInt = 0;
+                        StartCoroutine("DelayRequest");
+                    }
+                }
+                else if (board.moveColor == "black" && playerPlayingAs == "black")
+                {
+                    ShowMoveAndMove();
+                    checkMateMessage.text = playerPlayingAs;
+                }
+            }
+        }
+
+        private void ShowMoveAndMove()
+        {
             if (dad.picked == 1)
             {
                 ShowValidMoves();
             }
             else if (dad.picked == 0)
             {
-                UnmarkAllSquares();               
+                UnmarkAllSquares();
                 dad.picked = -1;
             }
-            GeneralProcees();
+            GeneralProcees(false);
         }
 
-        private void GeneralProcees()
+        private void GeneralProcees(bool noAction)
         {
  
-            if (dad.Action())
+            if (dad.Action() || noAction == true)
             {
-                Debug.Log("dad.Action = true");
-                string from = GetSquare(dad.pickPosition);
-                Debug.Log(from + " thisfrom");
-                string to = GetSquare(dad.dropPosition);
-                Debug.Log(to + " thisTo");
+
+                //Debug.Log("dad.Action = true");
+                string from;
+                string to;
+                if (noAction == false)
+                {
+                    from = GetSquare(dad.pickPosition);
+                    //Debug.Log(from + " !!!!!!!!!!!!!!!!thisfrom");
+                    to = GetSquare(dad.dropPosition);
+                    //Debug.Log(to + " !!!!!!!!!!!!!!!!!!thisTo");
+                }
+                else
+                {
+                    //SendMove_Get("sss");
+                    StringBuilder sb1 = new StringBuilder("a1");
+                    StringBuilder sb2 = new StringBuilder("a1");
+
+                    if (ServerAnswers.serverAnswerMove.Length == 4)
+                    {
+                        
+                        sb1[0] = ServerAnswers.serverAnswerMove[0];
+                        sb1[1] = ServerAnswers.serverAnswerMove[1];
+                        sb2[0] = ServerAnswers.serverAnswerMove[2];
+                        sb2[1] = ServerAnswers.serverAnswerMove[3];
+                    }
+                    else
+                    {
+                        sb1[0] = 'a';
+                        sb1[1] = '1';
+                        sb2[0] = 'a';
+                        sb2[1] = '1';
+                    }
+
+                    //Debug.Log("SB = " + sb1);
+
+                    from = Convert.ToString(sb1);
+
+                    //Debug.Log(from + " thisfrom");
+                    to = Convert.ToString(sb2);
+                    //Debug.Log(to + " thisTo");
+                    //Debug.Log(ServerAnswers.serverAnswerMove);
+
+
+                }
+
                 //string figure = chess.GetFigureAt(from).ToString();
                 //string move = figure + from + to;
                 //Debug.Log(move);
@@ -123,21 +263,39 @@ namespace ChessCore
                 activeCmd = Command.FillIntCmd(activeCmd);
 
 
-
-
-                if (board.Move(activeCmd) == true)
+                //foreach (var mov in board.validMoves)
+                //{
+                //    Debug.Log("VALIDE MOVE: " + mov);
+                //}
+                
+                Command validCommand = new(activeCmd);
+                validCommand.value  = Command.ToChessCoords(validCommand.value);
+                //Debug.Log("ACTIVE VALIDATE MOVE: " + validCommand.value);
+                if (board.validMoves.Contains(validCommand.value))
                 {
-                    if (activeCmd == cmd2)
+                    if (board.Move(activeCmd) == true)
                     {
-                        activeCmd = cmd1;
-                        enemyCmd = cmd2;
-                    }
-                    else
-                    {
-                        activeCmd = cmd2;
-                        enemyCmd = cmd1;
+                        SendMessageToChat(from + to);
+                        if(noAction == false)
+                        {
+                            SendMove_Get(PlayerData.NickName, (from + to));
+                        }
+
+                        //SendMove_GetSecond(from + to);
+
+                        if (activeCmd == cmd2)
+                        {
+                            activeCmd = cmd1;
+                            enemyCmd = cmd2;
+                        }
+                        else
+                        {
+                            activeCmd = cmd2;
+                            enemyCmd = cmd1;
+                        }
                     }
                 }
+                
                 board.moveColor = activeCmd.player;
                 Console.WriteLine(activeCmd.value);
                 Console.WriteLine(activeCmd.intvalues[0] + " " + activeCmd.intvalues[1] + " " + activeCmd.intvalues[2] + " " + activeCmd.intvalues[3]);
@@ -166,7 +324,7 @@ namespace ChessCore
                 {
                     try
                     {
-                        checkMateMessage.text = "nullbull";
+                        checkMateMessage.text = "";
                     }
                     catch (NullReferenceException ex)
                     {
@@ -183,17 +341,18 @@ namespace ChessCore
                     if (board.isCheck == true)
                     {
                         board.isMate = true;
-                        //checkMateMessage.text = "CheckMate";
+                        checkMateMessage.text = "CheckMate";
+                        Rules.ingame = false;
                     }
 
                     else
                     {
                         board.isPat = true;
-                        //checkMateMessage.text = "PAT";
+                        checkMateMessage.text = "PAT";
+                        Rules.ingame = false;
                     }
 
                 }
-                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
                 //chess = chess.Move(move);
@@ -201,8 +360,94 @@ namespace ChessCore
                 ShowFigures();
                 //MarkValidFigures();
 
+                UnmarkAllSquares();
+
             }
         }
+
+        //^^^^^^^^^^^^^^^^^^^^^^^^^^^SEND TO SERVER^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        public void RequestMove_Get(string EnemyName)
+        {
+            StartCoroutine(RequestMove_GetSecond(EnemyName));
+        }
+
+        //public bool SendMove_GetDelay(string myName, string move)
+        //{
+        //    Thread.Sleep(2000);
+        //    SendMove_GetSecond(move);
+        //    return true;
+        //}
+        public IEnumerator RequestMove_GetSecond(string EnemyName)
+        {
+
+            Debug.Log("METHOD ACTIVE");
+
+            string url = "https://localhost:7098/api/Battle/CurrentMove?name=" + EnemyName;
+            string answer = "null";
+            UnityWebRequest www = UnityWebRequest.Get(url);
+            yield return www.SendWebRequest();
+
+            answer = www.downloadHandler.text;
+
+            Debug.Log("ANSWER IS: " + answer);
+            ServerAnswers.serverAnswerMove = answer;
+
+            www.Dispose();
+        }
+
+
+        public void SendMove_Get(string myName, string move)
+        {
+            StartCoroutine(SendMove_GetSecond(myName, move));
+        }
+
+        //public bool SendMove_GetDelay(string myName, string move)
+        //{
+        //    Thread.Sleep(2000);
+        //    SendMove_GetSecond(move);
+        //    return true;
+        //}
+        public IEnumerator SendMove_GetSecond(string myName, string move)
+        {
+
+            Debug.Log("METHOD ACTIVE");
+
+            string url = "https://localhost:7098/api/Battle/SendMyMove?name=" + myName + "&move=" + move;
+            string answer = "null";
+            UnityWebRequest www = UnityWebRequest.Get(url);
+            yield return www.SendWebRequest();
+
+            answer = www.downloadHandler.text;
+
+            Debug.Log("ANSWER IS: " + answer);
+            ServerAnswers.serverAnswerMove = answer;
+
+            www.Dispose();
+        }
+
+        //---------------------------------------
+        //public void SendMove_Get2(string move)
+        //{
+        //    string url = "https://localhost:7098/api/Battle/CurrentMove?move=" + move;
+        //    string answer = "null";
+        //    UnityWebRequest www = UnityWebRequest.Get(url);
+        //    www.SendWebRequest();           
+
+        //    answer = www.downloadHandler.text;
+
+        //    while (answer != "Accept Move")
+        //    {
+        //        Thread.Sleep(1000);
+        //    }
+
+        //    Debug.Log(answer);
+
+        //    www.Dispose();
+        //}
+
+
+
+        //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         public void ValidateMoves()
         {
@@ -339,7 +584,7 @@ namespace ChessCore
         {
             board.GetPossibleMoves(activeCmd);
             ValidateMoves();
-            Debug.Log(((dad.pickPosition.x) / 1) + " " + ((dad.pickPosition.y) / 1));
+            //Debug.Log(((dad.pickPosition.x) / 1) + " " + ((dad.pickPosition.y) / 1));
             foreach (var el in board.validMoves)
             {
                 int x1 = Convert.ToInt32(el[0] - 'a');

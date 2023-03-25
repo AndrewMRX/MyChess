@@ -1,4 +1,5 @@
-﻿using ChessEntity;
+﻿using System.Data.SqlTypes;
+using ChessEntity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -44,9 +45,7 @@ namespace ChessWeb.Controllers
         [HttpPost]
         public string Login(string username, string password)
         {
-            string[] saltHashPair = PasswordHasher.CreateHash(password);
-            Console.WriteLine("Genered salt: " + saltHashPair[0]);
-            Console.WriteLine("Hashed pass: " + saltHashPair[1]);
+            
 
             var UsersInDb = from u in context.Users
                             where u.UserName.ToLower() == username
@@ -60,7 +59,9 @@ namespace ChessWeb.Controllers
             {
                 foreach (var u in UsersInDb)
                 {
-                    if (u.Password == saltHashPair[1])
+                    var saltstring = u.Salt;
+                    string[] hashedPassword = PasswordHasher.CheckHash(password, saltstring);
+                    if (u.Password == hashedPassword[1])
                     {
                         return ("success");
                     }
