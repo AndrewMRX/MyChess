@@ -57,7 +57,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scenes.cs" />
+    <Compile Include="Assets\ServerAnswers.cs" />
+    <Compile Include="Assets\PlayerDataController.cs" />
+    <Compile Include="Assets\ConnectingAwait.cs" />
+    <Compile Include="Assets\Requests.cs" />
+    <Compile Include="Assets\Style.cs" />
+    <Compile Include="Assets\LogReg.cs" />
     <Compile Include="Assets\Rules.cs" />
+    <Compile Include="Assets\PlayerData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -352,6 +359,12 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>F:\Unity3d\Unity Editor\2021.3.16f1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Common">
+      <HintPath>F:\Unity3d\Unity Editor\2021.3.16f1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Common.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>F:\Unity3d\Unity Editor\2021.3.16f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
